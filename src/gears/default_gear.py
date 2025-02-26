@@ -1,5 +1,6 @@
 import torch
 
+from .modules.deepspeed_trainer_base import DeepspeedTrainerBase
 from .modules.tester_base import TesterBase, tester_register
 from .modules.trainer_base import TrainerBase, trainer_register
 
@@ -47,6 +48,11 @@ class Trainer(TrainerBase):
     
     def _evaluate(self):
         super()._evaluate()
+        
+
+@trainer_register('deepspeed')
+class DeepspeedTrainer(DeepspeedTrainerBase):
+    pass
 
 
 @tester_register('default')

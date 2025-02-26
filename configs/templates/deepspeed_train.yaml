@@ -1,0 +1,42 @@
+config:  # main config (in this file) overrides additional configs
+  additional:  # add additional config file paths --- the order matters (later ones overwrite previous ones, then the main config (this file) overwrites them, and finally the command line arguments overwrite all)
+  - configs/defaults/shared.yaml
+  - configs/defaults/deepspeed_train.yaml
+
+special:
+  extra_name: template  # null for no extra name
+
+info:
+  output_dir: ./outputs/template/
+  project_name: template
+
+data:
+  dataset: simple
+  split_rate: 0.8
+
+model:
+  model_choice: simple
+  backbone: default
+
+criterion:
+  criterion_choice: default  # default as 'model.model_choice'
+  loss: mse
+  primary_criterion: null  # null (None) to use loss as primary_criterion
+  primary_criterion_higher_better: False  # XXX: important for choosing best model
+
+trainer:
+  ## batch_control
+  trainer_batch_size_per_rank: 32
+  sync_lr_with_batch_size: 0  # XXX: if > 0, sync lr with batchsize (lr_real = lr_config * batch_size_total[all_ranks, grad_accumulation] / sync_lr_with_batch_size)
+  ## batch_control ends
+  trainer_choice: deepspeed
+  resume: null  # if setting to an existing cfg.yaml, make sure critical params(model, data, optimizer, scheduler, ...) are the same
+  pretrained_models: null  # None or a dict of pretrained models {name1: path1, name2: path2, ...}
+  load_from_ema: True
+  epochs: 10
+  real_epochs: null  # if not None, do early stopping based on real_epochs (scheduler is still based on epochs)
+
+sweep:
+  sweep_enabled: False
+  sweep_params:  # use '//' as the connector for sub-params
+    trainer//trainer_batch_size_per_rank: [16, 32]

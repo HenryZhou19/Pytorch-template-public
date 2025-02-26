@@ -1,0 +1,58 @@
+env:
+  seed_with_rank: True
+  cuda_deterministic: False
+  find_unused_parameters: True
+
+info: # info & wandb
+  start_time : TBD
+  work_dir: TBD
+  task_type: Train  # Pretrain, Train, Pretrain_Re, Train_Re, ...
+  batch_info: TBD
+  name_tags: [special.extra_name, model.model_choice, data.dataset, info.batch_info]
+  wandb:
+    wandb_enabled: True
+    wandb_tags: [info.start_time]
+    wandb_resume_enabled: False  # if True, wandb run will have the same ID when resuming an existing training work
+    wandb_watch_model: False  # do not use if it's unnecessary
+    wandb_watch_freq: 100
+    wandb_buffer_time: 300  # seconds
+  tensorboard:
+    tensorboard_enabled: True
+    tensorboard_graph: False
+  iter_log_freq: 10  # <= 0 means only log when an epoch ends
+  cli_log_freq: 1
+  global_tqdm: True
+  torchinfo: True  # print model info to logs.log
+  print_param_names: True
+  print_module_states: False
+
+model:
+  ema:
+    ema_enabled: False
+    ema_type: EMA
+    ema_beta: 0.9999
+    ema_update_after_step: 100
+    ema_update_every: 10
+    ema_power: 0.75
+    ema_primary_criterion: True
+
+trainer:
+  ## batch_control
+  trainer_batch_size_per_rank: null  # override this in main config
+  sync_lr_with_batch_size: 0  # XXX: if > 0, sync lr with batchsize (lr_real = lr_config * batch_size_total[all_ranks, grad_accumulation] / sync_lr_with_batch_size)
+  trainer_batch_size_total: TBD
+  fixed_length_trainloader: 0  # if > 0, the dataloader will be set to the fixed length (update_steps = fixed_length_trainloader // grad_accumulation) per training epoch (one epoch's data may be truncated or repeated)
+  fixed_length_valloader: 0  # as above, but for validation
+  ## batch_control ends
+  trainer_breath_time: 0.0
+  trainer_choice: deepspeed
+  resume: null
+  pretrained_models: null  # None or a dict of pretrained models {name1: path1, name2: path2, ...}
+  load_from_ema: True
+  dist_eval: True
+  eval_freq: 1  # <= 0 means only evaluate when all epochs end
+  grad_checkpoint: False
+  checkpoint_last_interval: 1  # must > 0. save the last checkpoint every {checkpoint_last_interval} epochs (keep latest)
+  checkpoint_keep_interval: 0  # if > 0, save the checkpoint every {checkpoint_keep_interval} epochs (keep all)
+  deepspeed:
+    pass: TBD
